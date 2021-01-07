@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockChain Project</title>
+    <script src='node_modules/web3/dist/web3.min.js'></script>
+</head>
+
+<body>
+    BlockChain Project 
+    <br />
+    <button onclick="printCoolNumber();">Print Cool Number</button>
+    <button onclick="changeCoolNumber();">Change Cool Number</button>
+    <br /><br />
+
+    Status: <span id="status">Loading...</span>
+    <script type="text/javascript">
+        async function loadWeb3(){
+            //enables Metamask 
+            if (window.ethereum) {
+                window.web3 = new Web3(window.ethereum);
+                window.ethereum.enable();
+            }
+        }
+        //first argument is the ABI from Solidity compiler
+        //second argument is the contract address from the Solidity deployment
+        async function loadContract(){
+            return await new window.web3.eth.Contract([
+                {
+                    "constant": false,
+                    "inputs": [
+                        {
+                            "name": "_coolNumber",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setCoolNumber",
+                    "outputs": [],
+                    "payable": false,
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "constant": true,
+                    "inputs": [],
+                    "name": "coolNumber",
+                    "outputs": [
+                        {
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "payable": false,
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ],'0xd1EBbe15B991Ec9C97c7b611B66BAB0c8489C46E')
+        }
+
+        async function printCoolNumber(){
+            updateStatus('fetching cool number..');
+            const coolNumber = await window.contract.methods.coolNumber().call();
+            updateStatus(`Cool number is: ${coolNumber}`);
+        }
+
+        async function getCurrentAccount(){
+            //get all metamask accounts
+            const accounts = await window.web3.eth.getAccounts();
+            return accounts[0];
+        }
+
+        async function changeCoolNumber(){
+            const value = Math.floor(Math.random() * 100);
+            updateStatus(`updating cool number to be: ${value}, please wait...`);
+            //account from my metamask
+            const account = await getCurrentAccount();
+            //each time we set the number a transaction is created
+            const coolNumber = await window.contract.methods.setCoolNumber(value).send({ from: account });
+            updateStatus('Cool number update complete!');
+        }
+
+        async function load(){
+            await loadWeb3();
+            window.contract = await loadContract();
+            updateStatus('Ready!');
+        }
+
+        function updateStatus(status){
+            const statusEl = document.getElementById('status');
+            statusEl.innerHTML = status;
+            console.log(status);
+        }
+
+        load();
+    </script>
+</body>
+</html>
