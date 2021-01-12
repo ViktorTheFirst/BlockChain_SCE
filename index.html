@@ -4,17 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BlockChain Project</title>
+    <link rel="stylesheet" href="styles.css">
     <script src='node_modules/web3/dist/web3.min.js'></script>
 </head>
 
 <body>
-    BlockChain Project 
-    <br />
-    <button onclick="printCoolNumber();">Print Cool Number</button>
-    <button onclick="changeCoolNumber();">Change Cool Number</button>
-    <br /><br />
+    <div id='content'>
+        <h1>BlockChain Project - Marriage Certificate</h1>
+        <br />
+        <h4>This is a marriage certificate between the parties:</h4>
+        <br />
+        <span id='addresses'>-- No addresses loaded --</span>
+        <br />
 
-    Status: <span id="status">Loading...</span>
+    </div>
+    <div id='btns'>
+        
+        <button id='firstBtn' onclick="checkForSignature();">Check for signature</button>
+        <button id='secondBtn' class="" onclick="signTheContract();">Sign Marriage Certificate</button>
+        <br /><br />
+
+    </div>
+    <div id='status'>
+
+        Status: <span id="status">Loading...</span>
+    </div>
     <script type="text/javascript">
         async function loadWeb3(){
             //enables Metamask 
@@ -27,41 +41,69 @@
         //second argument is the contract address from the Solidity deployment
         async function loadContract(){
             return await new window.web3.eth.Contract([
-                {
-                    "constant": false,
-                    "inputs": [
-                        {
-                            "name": "_coolNumber",
-                            "type": "uint256"
-                        }
-                    ],
-                    "name": "setCoolNumber",
-                    "outputs": [],
-                    "payable": false,
-                    "stateMutability": "nonpayable",
-                    "type": "function"
-                },
-                {
-                    "constant": true,
-                    "inputs": [],
-                    "name": "coolNumber",
-                    "outputs": [
-                        {
-                            "name": "",
-                            "type": "uint256"
-                        }
-                    ],
-                    "payable": false,
-                    "stateMutability": "view",
-                    "type": "function"
-                }
-            ],'0xd1EBbe15B991Ec9C97c7b611B66BAB0c8489C46E')
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "_signature",
+				"type": "bool"
+			}
+		],
+		"name": "setPartnerSignature",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "contractCreatorAddress",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "partnerAddress",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "partnerSignature",
+		"outputs": [
+			{
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+],'0xc0206ea2c6f2bbdd9aa0ad6b2db25c024ba16413')
         }
 
-        async function printCoolNumber(){
-            updateStatus('fetching cool number..');
-            const coolNumber = await window.contract.methods.coolNumber().call();
-            updateStatus(`Cool number is: ${coolNumber}`);
+        async function checkForSignature(){
+            updateStatus('Cheking if your partner signed the document..');
+            const signature = await window.contract.methods.partnerSignature().call();
+            updateStatus(`Signature status is: ${signature}`);
         }
 
         async function getCurrentAccount(){
@@ -69,20 +111,23 @@
             const accounts = await window.web3.eth.getAccounts();
             return accounts[0];
         }
-
-        async function changeCoolNumber(){
-            const value = Math.floor(Math.random() * 100);
-            updateStatus(`updating cool number to be: ${value}, please wait...`);
+        //TODO 
+        async function signTheContract(){
+            
+            updateStatus(`You just signed the document, certificate is being updated please wait...`);
             //account from my metamask
             const account = await getCurrentAccount();
-            //each time we set the number a transaction is created
-            const coolNumber = await window.contract.methods.setCoolNumber(value).send({ from: account });
-            updateStatus('Cool number update complete!');
+            //each time we create signature a transaction is created
+            const sig = await window.contract.methods.setPartnerSignature(true).send({ from: account });
+            updateStatus('Sertificate is ready and signed!');
         }
 
+        //first function to be executed
         async function load(){
-            await loadWeb3();
+            await loadWeb3(); // ----> enables metamask auth
             window.contract = await loadContract();
+            updateCoupleAddress(); // ------> loads the addresses of the couple 
+            conditional();
             updateStatus('Ready!');
         }
 
@@ -90,6 +135,29 @@
             const statusEl = document.getElementById('status');
             statusEl.innerHTML = status;
             console.log(status);
+        }
+
+        async function updateCoupleAddress(){
+            const addressPreviewEl = document.getElementById('addresses');
+            addressPreviewEl.innerHTML =  `1. <b> ${await getCurrentAccount()} - certificate initiator </b>
+            <br/> 
+            2. <b> ${await window.contract.methods.partnerAddress().call()} - certificate receiver </b>`
+        }
+
+        async function conditional(){
+            const curr = await getCurrentAccount();
+            const creator = await window.contract.methods.contractCreatorAddress().call();
+            
+            //creator perspective
+            if( curr == creator){
+                const btnEl = document.getElementById('secondBtn');
+                btnEl.classList.add('hidden');
+            }
+            //receiver perspective
+            if( curr !== creator ){
+                const btnEl = document.getElementById('firstBtn');
+                btnEl.classList.add('hidden');
+            }
         }
 
         load();
