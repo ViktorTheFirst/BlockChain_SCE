@@ -32,11 +32,14 @@
     <script type="text/javascript">
 
         async function loadWeb3(){
+            updateStatus('Status: MetaMask authorization is required, waiting...')
             //enables Metamask 
             if (window.ethereum) {
                 window.web3 = new Web3(window.ethereum);
-                window.ethereum.enable();
+                const res = await window.ethereum.enable(); // ----> Metamask pop up window
+                if(res) return true; // ----> only continue execution if user logged in
             }
+            
         }
         //first argument is the ABI from Solidity compiler
         //second argument is the contract address from the Solidity deployment
@@ -176,11 +179,14 @@
 
         //first function to be executed
         async function load(){
+            console.log('load is ACTIVATED');
             updateStatus('Status: Loading data...')
-            await loadWeb3(); // ----> enables metamask auth
-            window.contract = await loadContract(); // ----> loads contract
-            updateCoupleAddress();
-            updateStatus('Status: Awaiting user action')
+            const res = await loadWeb3(); // ----> enables metamask auth
+            if(res){
+                window.contract = await loadContract(); // ----> loads contract
+                updateCoupleAddress();
+                updateStatus('Status: Awaiting user action')
+            }
         }
 
         async function updateStatus(status){
@@ -190,6 +196,7 @@
         
         //function that determines different perspectives 
         async function updateCoupleAddress(){
+            console.log('updateCoupleAddress is ACTIVATED');
             const curr = await getCurrentAccount(); // ----> the account that is currently logged to Metamask
             const creator = await window.contract.methods.contractCreatorAddress().call();
             const brideAddress = await window.contract.methods.brideAddress().call();
