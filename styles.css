@@ -15,8 +15,11 @@ body {
   background-position: center;
   background-repeat: no-repeat;
 }
-h1 {
-  color: rgb(42, 42, 133);
+h1,
+h3,
+h4 {
+  text-align: center;
+  margin-left: 90px;
 }
 
 #btns {
@@ -32,4 +35,14 @@ h1 {
 
 .hidden {
   visibility: hidden;
+}
+
+#content {
+  position: relative;
+  width: 50%;
+  height: 50vh;
+}
+
+#addresses {
+  padding: 20px;
 }

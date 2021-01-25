@@ -12,15 +12,15 @@
     <div id='content'>
         <br />
         <br />
-        <h1 style="text-align: center; margin-left: 90px;" >BlockChain Project - SCE 2020</h1>
+        <h1>BlockChain Project - SCE 2020</h1>
         <br />
-        <h3 id='perspective' style="text-align: center; margin-left: 90px;">[you logged in as: -not logged in-]</h3>
-        <h4 style="text-align: center; margin-left: 90px;">This is a marriage certificate between the parties:</h4>
+        <h3 id='perspective'>[you logged in as: -not logged in-]</h3>
+        <h4>This is a marriage certificate between the parties:</h4>
         <br />
-        <span id='addresses' >-- No addresses loaded --</span>
+        <div id='addresses' >-- No addresses loaded --</div>
     </div>
     <div id='bottom'>
-        <div id='btns' style="flex: 1">
+        <div id='btns'>
             <button id='checkBtn' onclick="checkForSignatures();">Check for signatures</button>
             <button id='signBtn'  onclick="signTheContract();">Sign Marriage Certificate</button>
         </div>
@@ -32,7 +32,7 @@
     <script type="text/javascript">
 
         async function loadWeb3(){
-            updateStatus('Status: MetaMask authorization is required, waiting...')
+            updateStatus('<b>Status:</b> MetaMask authorization is required, waiting...')
             //enables Metamask 
             if (window.ethereum) {
                 window.web3 = new Web3(window.ethereum);
@@ -147,10 +147,10 @@
         }
 
         async function checkForSignatures(){
-            updateStatus('Checking signatures of the participants, please wait...')
+            updateStatus('<b>Status:</b> Checking signatures of the participants, please wait...')
             const BrideSignature = await window.contract.methods.brideSignature().call();
             const GroomSignature = await window.contract.methods.groomSignature().call();
-            updateStatus(`Participants signature status is: <br /> Bride: ${BrideSignature} <br /> Groom: ${GroomSignature}`)
+            updateStatus(`<b>Status:</b> Participants signature status is: <br /> Bride: ${BrideSignature} <br /> Groom: ${GroomSignature}`)
         }
 
         async function getCurrentAccount(){
@@ -161,7 +161,7 @@
         }
         
         async function signTheContract(){
-            updateStatus('The contract is being signed, please wait...')
+            updateStatus('<b>Status:</b> The contract is being signed, please wait...')
             //account from my metamask
             const account = await getCurrentAccount();
             const brideAddress = await window.contract.methods.brideAddress().call();
@@ -169,23 +169,23 @@
             //each time we create signature a transaction is created
             if(account == brideAddress){
                 await window.contract.methods.setBrideSignature(true).send({ from: account });
-                updateStatus('Congrats, you have signed the contract!');
+                updateStatus('<b>Status:</b> Congrats, you have signed the contract!');
             }
             if(account == groomAddress){
                 await window.contract.methods.setGroomSignature(true).send({ from: account });
-                updateStatus('Congrats, you have signed the contract!');
+                updateStatus('<b>Status:</b> Congrats, you have signed the contract!');
             }
         }
 
         //first function to be executed
         async function load(){
             console.log('load is ACTIVATED');
-            updateStatus('Status: Loading data...')
+            updateStatus('<b>Status:</b> Loading data...')
             const res = await loadWeb3(); // ----> enables metamask auth
             if(res){
                 window.contract = await loadContract(); // ----> loads contract
                 updateCoupleAddress();
-                updateStatus('Status: Awaiting user action')
+                updateStatus('<b> Status: </b> Awaiting user action')
             }
         }
 
