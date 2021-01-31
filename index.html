@@ -118,6 +118,20 @@
 	{
 		"constant": true,
 		"inputs": [],
+		"name": "creatorAddress",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
 		"name": "groomAddress",
 		"outputs": [
 			{
@@ -143,7 +157,7 @@
 		"stateMutability": "view",
 		"type": "function"
 	}
-],'0xd9145CCE52D386f254917e481eB44e9943F39138')
+],'0x1E6D8711e1a884E5af71A855bEbBA4a905319B62')
         }
 
         async function checkForSignatures(){
@@ -201,6 +215,7 @@
             const creator = await window.contract.methods.contractCreatorAddress().call();
             const brideAddress = await window.contract.methods.brideAddress().call();
             const groomAddress = await window.contract.methods.groomAddress().call();
+            const creatorAddress = await window.contract.methods.creatorAddress().call();
             
             const addressPreviewEl = document.getElementById('addresses');
             const perspectiveEl = document.getElementById('perspective');
@@ -211,18 +226,24 @@
                 perspectiveEl.innerHTML = '[you logged in as: BRIDE]';
                 checkBtnEl.classList.add('hidden');
             }
-            if(curr == groomAddress){
+            else if(curr == groomAddress){
                 perspectiveEl.innerHTML = '[you logged in as: GROOM]';
                 checkBtnEl.classList.add('hidden');
             }
-            if(curr == creator){
-                perspectiveEl.innerHTML = '[you logged in as: CONTRACT CREATOR]';
+            else if(curr == creator){
+                perspectiveEl.innerHTML = '[you logged in as: LAWYER]';
+                signBtnEl.classList.add('hidden');
+            }
+            else{
+                perspectiveEl.innerHTML = '[you logged in as: GUEST]';
                 signBtnEl.classList.add('hidden');
             }
 
             addressPreviewEl.innerHTML =  `1. <b> ${brideAddress} - the address of the BRIDE </b>
             <br/> 
-            2. <b> ${groomAddress} - the address of the GROOM </b>`
+            2. <b> ${groomAddress} - the address of the GROOM </b>
+            <br/> 
+            3. <b> ${creatorAddress} - the address of the LAWYER</b>`
         }
 
         load();
